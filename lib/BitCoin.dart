@@ -12,13 +12,20 @@ class BitCoin extends StatefulWidget {
 class _BitCoinState extends State<BitCoin> {
 
   String url = "https://blockchain.info/ticker";
-  double priceBRL = 0;
+  String priceBRL = "";
 
   _atualizarPreco() async {
 
     http.Response response = await http.get(url);
     print(response.body);
     Map<String,dynamic> preco = json.decode(response.body);
+
+    this.setState(() {
+
+      priceBRL = preco["BRL"]["buy"].toString();
+
+    });
+
 
   }
 
@@ -33,7 +40,10 @@ class _BitCoinState extends State<BitCoin> {
             Padding(padding: EdgeInsets.all(16),
             child: Image.asset("imagens/bitcoin.png"),),
             Padding(padding: EdgeInsets.all(16),
-            child: Text("R")),
+            child: Text("R\$ ${priceBRL}",style: TextStyle(
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+            ),)),
             ElevatedButton(onPressed: _atualizarPreco, child: Text("Atualizar"),style: ElevatedButton.styleFrom(
               primary: Colors.orange,
               onPrimary: Colors.white,
