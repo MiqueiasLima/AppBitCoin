@@ -12,21 +12,15 @@ class BitCoin extends StatefulWidget {
 class _BitCoinState extends State<BitCoin> {
 
   String url = "https://blockchain.info/ticker";
-  String priceBRL = "";
 
-  _atualizarPreco() async {
-
+  Future<dynamic> atualizarPreco() async {
     http.Response response = await http.get(url);
-    print(response.body);
     Map<String,dynamic> preco = json.decode(response.body);
-
-    this.setState(() {
-
-      priceBRL = preco["BRL"]["buy"].toString();
-
-    });
-
-
+    if (preco.containsKey('BRL')) {
+      return preco["BRL"]["buy"].toString();
+    } else {
+      return 'not found brl buy';
+    }
   }
 
   @override
@@ -40,11 +34,30 @@ class _BitCoinState extends State<BitCoin> {
             Padding(padding: EdgeInsets.all(16),
             child: Image.asset("imagens/bitcoin.png"),),
             Padding(padding: EdgeInsets.all(16),
-            child: Text("R\$ ${priceBRL}",style: TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-            ),)),
-            ElevatedButton(onPressed: _atualizarPreco, child: Text("Atualizar"),style: ElevatedButton.styleFrom(
+              child: FutureBuilder(
+                future: atualizarPreco(),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData) {
+                    String price = snapshot.data;
+                    return Text("R\$ $price", 
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('error');
+                  } else {
+                    return SizedBox(
+                      child: CircularProgressIndicator(color: Colors.orange),
+                      width: 40,
+                      height: 40,
+                    );
+                  }
+                },
+              )
+            ),
+            ElevatedButton(onPressed: atualizarPreco, child: Text("Atualizar"),style: ElevatedButton.styleFrom(
               primary: Colors.orange,
               onPrimary: Colors.white,
             ),)
